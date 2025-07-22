@@ -83,11 +83,14 @@ def indie_score(listeners):
 
 
 def get_artists_from_playlist(playlist_url, sp):
+    logging.info("🎵 Extracting artists from playlist")
     pattern = r"playlist/([a-zA-Z0-9]+)"
     match = re.search(pattern, playlist_url)
     if not match:
         raise ValueError("Invalid playlist URL")
     playlist_id = match.group(1)
+
+    logging.debug(f"Playlist ID: {playlist_id}")
 
     artist_counts = defaultdict(int)
     results = sp.playlist_items(playlist_id, additional_types=['track'])
@@ -105,6 +108,7 @@ def get_artists_from_playlist(playlist_url, sp):
         else:
             results = None
 
+    logging.info(f"✅ Found {len(artist_counts)} unique artists")
     return artist_counts
 
 
@@ -155,12 +159,14 @@ async def fetch_with_retry(page, artist, url, retries=RETRIES):
 
 
 async def fetch_monthly_listeners(artist_urls):
+    logging.info("📡 Starting monthly listeners fetch")
     results = []
     semaphore = asyncio.Semaphore(CONCURRENT_TASKS)
     cache = safe_load_cache(LISTENERS_CACHE_FILE)
 
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
+        logging.info("🚀 Chromium launched")
 
         async def bound_fetch(artist, url):
             if not url:
@@ -181,10 +187,11 @@ async def fetch_monthly_listeners(artist_urls):
             results.append(result)
 
         await browser.close()
+        logging.info("🛑 Chromium closed")
 
     save_cache(cache, LISTENERS_CACHE_FILE)
+    logging.info("💾 Cache saved")
     return results
-
 
 def parse_listeners(listeners_str):
     if listeners_str is None:
@@ -340,14 +347,18 @@ async def read_root(request: Request, playlist: str = None):
         return templates.TemplateResponse("indie_report.html", {"request": request, "playlist_name": None})
 
     try:
+        logging.info("🔗 Received playlist URL")
+
         sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(
             client_id=SPOTIFY_CLIENT_ID,
             client_secret=SPOTIFY_CLIENT_SECRET
         ))
 
         df = await score_artists_from_playlist_async(playlist)
+        logging.info("✅ Artists scored")
 
         weighted_indie_score = round(np.average(df['IndieScore'], weights=df['n']), 2)
+        logging.info(f"📊 Weighted Indie Score: {weighted_indie_score}")
         listener_distribution = get_listener_distribution(df)
         playlist_id = extract_playlist_id(playlist)
 
