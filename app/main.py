@@ -15,8 +15,6 @@ import os
 import shutil
 import logging
 
-os.environ["PLAYWRIGHT_BROWSERS_PATH"] = "/app/.playwright"
-
 logging.basicConfig(
     level=logging.DEBUG,  # ✅ Make sure this is DEBUG
     format="%(asctime)s [%(levelname)s] %(message)s",

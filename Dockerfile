@@ -8,7 +8,6 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Set environment variable so Playwright installs browsers into app dir
-ENV PLAYWRIGHT_BROWSERS_PATH=/app/.playwright
 
 # Set working directory
 WORKDIR /app
