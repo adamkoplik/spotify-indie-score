@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+jinja2
+spotipy
+pandas
+numpy
+playwright
+matplotlib
+seaborn
+tk
+python-multipart

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head><title>Results</title></head>
+<body>
+  <h2>{{ playlist_name }}</h2>
+  <img src="{{ playlist_image_url }}" width="200" />
+  <h3>Top Indie Artist: {{ most_indie_artist.Artist }}</h3>
+  <p>Score: {{ most_indie_artist.IndieScore }}</p>
+  <p>Weighted Score: {{ weighted_indie_score | round(1) }}</p>
+
+  <h3>Top 10 Artists</h3>
+  <ul>
+  {% for row in top_10 %}
+    <li>{{ row.Artist }} ({{ row.IndieScore }})</li>
+  {% endfor %}
+  </ul>
+</body>
+</html>

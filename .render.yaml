@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: spotify-indie-score
+    env: docker
+    repo: https://github.com/adamkoplik/spotify-indie-score.git
+    branch: main
+    envVars:
+      - key: SPOTIFY_CLIENT_ID
+        value: 5cea519d0b1446de97f8c54afed8497d
+      - key: SPOTIFY_CLIENT_SECRET
+        value: 305c6e938a824fab9683ea78c7b2ae44
