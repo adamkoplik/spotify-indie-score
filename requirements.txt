@@ -5,6 +5,7 @@ spotipy
 pandas
 numpy
 playwright
+aiofiles
 matplotlib
 seaborn
 tk
