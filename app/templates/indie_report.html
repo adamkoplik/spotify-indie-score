@@ -5,7 +5,7 @@
   <title>Your Indievaluation Report</title>
   <style>
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Roboto', sans-serif;
     background-color: #f5f5f5;
     margin: 20px;
 }
@@ -40,7 +40,7 @@ th, td {
     text-align: left;
 }
 th {
-    background-color: #2a9d8f;
+    background-color: #1db954;
     color: white;
 }
 h2 {
@@ -56,12 +56,11 @@ form input[type="text"] {
 form button {
     padding: 10px 20px; 
     font-size: 16px; 
-    background-color: #2a9d8f; 
+    background-color: #1db954; 
     color: white; 
     border: none; 
     border-radius: 5px; 
-    cursor: pointer
-    ;
+    cursor: pointer;
 }
 .similar-playlists {
   display: flex;
@@ -123,7 +122,7 @@ form button {
 }
 
 .owner-name {
-  color: #2a9d8f;
+  color: #1db954;
   text-decoration: none;
 }
 
@@ -140,14 +139,10 @@ form button {
 </head>
 <body>
   <div style="text-align: center; margin-bottom: 40px;">
-    <div div style = "display: flex; flex-direction: row; align-items: center; gap: 5px;">
-    <h1>Paste a link to a public Spotify playlist to get your indie score!</h1>
-    <p style="font-style: italic;">Note: Larger playlists may take a while to process</p>
-  </div>
     <form method="get" action="/">
       <input type="text" name="playlist" placeholder="Paste Spotify Playlist Link"
         style="width: 300px; padding: 10px; font-size: 16px;" />
-      <button type="submit" style="padding: 10px 20px;">Load Playlist</button>
+      <button type="submit" style="padding: 10px 20px;">Get My Indie Score!</button>
     </form>
   </div>
 
@@ -155,15 +150,22 @@ form button {
   <div style="text-align: center; margin-bottom: 40px;">
     <a href="{{ playlist_url }}" target="_blank" style="text-decoration: none; color: inherit;">
       <img src="{{ playlist_image_url }}" alt="Playlist Cover" style="width: 120px; height: 120px; border-radius: 12px;" />
-      <h1>Your Indievaluation for {{ playlist_name }}</h1>
+      <h1>Your Indievaluation for <span style="color: #1db954;">{{ playlist_name }}</span></h1>
     </a>
   </div>
 
   <div class="container">
     <div class="col" style="text-align:center;">
       <h2>Playlist IndieScore</h2>
-      <p style="font-size: 48px; font-weight: bold; color: #2a9d8f;">{{ weighted_indie_score }}</p>
-      <h3>Your playlist ranks #{{ rank }} out of {{ total }} playlists analyzed.</h3>
+      {% if weighted_indie_score >= 80 %}
+        <p style="font-size: 48px; font-weight: bold; color: #1db954;">{{ weighted_indie_score }}</p>  <!-- Spotify Green -->
+      {% elif weighted_indie_score >= 50 %}
+        <p style="font-size: 48px; font-weight: bold; color: #f9a825;">{{ weighted_indie_score }}</p>  <!-- Amber -->
+      {% else %}
+        <p style="font-size: 48px; font-weight: bold; color: #e53935;">{{ weighted_indie_score }}</p>  <!-- Red -->
+      {% endif %}
+      
+      <h3>{{ percentile }}</h3>
       <div class="col" style="text-align:left;">
         <h2 style="text-align:center;">Playlists with Similar IndieScores</h2>
         <div style="display: flex; flex-direction: column; gap: 16px; margin-top: 20px;">
@@ -183,7 +185,7 @@ form button {
                             style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;" />
                       {% endif %}
                       <p href="{{ pl.owner_url }}" target="_blank"
-                        style="font-size: 0.9rem; color: #2a9d8f; text-decoration: none;">{{ pl.owner_name }}</p>
+                        style="font-size: 0.9rem; color: #1db954; text-decoration: none;">{{ pl.owner_name }}</p>
                         
             
                   </div>
@@ -240,6 +242,8 @@ form button {
       </table>
     </div>
   </div>
+  {% else %}
+  <h2>"Oooo look at me I'm so indie". I don't believe you. Prove it.</h2>
   {% endif %}
 </body>
 </html>

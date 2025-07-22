@@ -13,6 +13,17 @@ from collections import defaultdict
 import json
 import os
 import shutil
+import logging
+
+logging.basicConfig(
+    level=logging.DEBUG,  # ✅ Make sure this is DEBUG
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[
+        logging.FileHandler("app.log"),
+        logging.StreamHandler()
+    ]
+)
+
 
 app = FastAPI()
 templates = Jinja2Templates(directory="app/templates")
@@ -226,11 +237,16 @@ def extract_playlist_id(playlist_url):
 
 def get_playlist_info(playlist_url: str, sp):
     playlist_id = extract_playlist_id(playlist_url)
+    logging.info(f"📥 Extracted playlist ID: {playlist_id}")
     data = sp.playlist(playlist_id)
-
     name = data['name']
     image_url = data['images'][0]['url'] if data['images'] else None
-
+    logging.info("" \
+    "" \
+    "" \
+    "" \
+    "" \
+    "EXCUSE ME", name)
     owner = data['owner']
     owner_name = owner['display_name']
     owner_url = owner['external_urls']['spotify']
@@ -247,7 +263,7 @@ def get_playlist_info(playlist_url: str, sp):
 
 
 def get_listener_distribution(df):
-    bins = [0, 10_000, 100_000, 1_000_000, 10_000_000, 50_000_000, 1_200_000_00]
+    bins = [0, 10_000, 100_000, 1_000_000, 10_000_000, 50_000_000, 1_200_000_000]
     labels = ['0-10k', '10k-100k', '100k-1M', '1M-10M', '10M-50M', '>50M']
     df['ListenerRange'] = pd.cut(df['ListenersInt'], bins=bins, labels=labels, right=False)
 
@@ -255,6 +271,7 @@ def get_listener_distribution(df):
         count=('Artist', 'count'),
         avg_score=('IndieScore', 'mean')
     ).reset_index()
+    logging.info("here", distribution)
 
     total = distribution['count'].sum()
     distribution['percent'] = distribution['count'] / total * 100
@@ -262,7 +279,6 @@ def get_listener_distribution(df):
 
     distribution = distribution.rename(columns={'ListenerRange': 'label'})
     distribution = distribution.fillna({'score_band': 0, 'percent': 0})
-
     return distribution.to_dict(orient='records')
 
 
@@ -362,6 +378,11 @@ async def read_root(request: Request, playlist: str = None):
 
         rank = get_playlist_rank(playlist_id, leaderboard)
         total = len(leaderboard)
+        percentile = round((rank / total)*100,0)
+        if percentile <= 50:
+            percentile_txt = f"Your playlist ranks in the top {percentile}% of all users ({rank} / {total})!"
+        else:
+            percentile_txt = f"Your playlist ranks in the bottom {100 - percentile}% of all users ({rank} / {total})..."
 
         return templates.TemplateResponse("indie_report.html", {
             "request": request,
@@ -377,6 +398,7 @@ async def read_root(request: Request, playlist: str = None):
             "most_indie_artist_image": most_indie_artist_image,
             "rank": rank,
             "total": total,
+            "percentile": percentile_txt,
             "similar_playlists": similar_playlists
         })
     except Exception as e:
@@ -385,3 +407,4 @@ async def read_root(request: Request, playlist: str = None):
             "playlist_name": None,
             "error": str(e)
         })
+    
