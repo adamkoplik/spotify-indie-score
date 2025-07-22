@@ -3,6 +3,7 @@ services:
     name: spotify-indie-score
     env: python
     buildCommand: |
+      apt-get update && apt-get install -y libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libxkbcommon0 libxcomposite1 libxdamage1 libxrandr2 libgbm1 libpango-1.0-0 libasound2 libxshmfence1
       pip install -r requirements.txt
       playwright install chromium
     startCommand: gunicorn app.main:app -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:10000
