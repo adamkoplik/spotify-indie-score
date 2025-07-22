@@ -1,11 +1,17 @@
 services:
   - type: web
     name: spotify-indie-score
-    env: docker
-    repo: https://github.com/adamkoplik/spotify-indie-score.git
-    branch: main
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app.main:app -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:10000
     envVars:
-      - key: SPOTIFY_CLIENT_ID
-        value: 5cea519d0b1446de97f8c54afed8497d
-      - key: SPOTIFY_CLIENT_SECRET
-        value: 305c6e938a824fab9683ea78c7b2ae44
+      - key: PORT
+        value: 10000
+      - key: DEBUG_MODE
+        value: "1"
+      - key: LOG_LEVEL
+        value: "debug"
+    autoDeploy: true
+    plan: free
+    runtime: python
+    region: oregon
