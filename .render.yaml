@@ -2,8 +2,9 @@ services:
   - type: web
     name: spotify-indie-score
     env: python
-    plan: free
+    plan: starter
     buildCommand: |
+      export PLAYWRIGHT_BROWSERS_PATH=0
       pip install -r requirements.txt
       python -m playwright install chromium
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port 10000
@@ -11,4 +12,4 @@ services:
       - key: PORT
         value: 10000
       - key: PLAYWRIGHT_BROWSERS_PATH
-        value: /opt/render/project/.playwright
+        value: 0
