@@ -33,9 +33,10 @@ os.makedirs(DATA_DIR, exist_ok=True)
 app = FastAPI()
 templates = Jinja2Templates(directory="app/templates")
 
-# Spotify credentials
-SPOTIFY_CLIENT_ID = "5cea519d0b1446de97f8c54afed8497d"
-SPOTIFY_CLIENT_SECRET = "305c6e938a824fab9683ea78c7b2ae44"
+# Spotify credentials — pulled from environment variables (set these in Render's
+# Environment tab). Never hardcode secrets in source.
+SPOTIFY_CLIENT_ID = os.environ["SPOTIFY_CLIENT_ID"]
+SPOTIFY_CLIENT_SECRET = os.environ["SPOTIFY_CLIENT_SECRET"]
 
 CONCURRENT_TASKS = 5
 RETRIES = 3
@@ -284,12 +285,7 @@ def get_playlist_info(playlist_url: str, sp):
             raise
     name = data['name']
     image_url = data['images'][0]['url'] if data['images'] else None
-    logging.info("" \
-    "" \
-    "" \
-    "" \
-    "" \
-    "EXCUSE ME", name)
+    logging.info(f"Playlist name: {name}")
     owner = data['owner']
     owner_name = owner['display_name']
     owner_url = owner['external_urls']['spotify']
@@ -314,7 +310,7 @@ def get_listener_distribution(df):
         count=('Artist', 'count'),
         avg_score=('IndieScore', 'mean')
     ).reset_index()
-    logging.info("here", distribution)
+    logging.info(f"Listener distribution: {distribution.to_dict(orient='records')}")
 
     total = distribution['count'].sum()
     distribution['percent'] = distribution['count'] / total * 100
@@ -377,7 +373,7 @@ def get_similar_playlists(current_id, current_score, leaderboard, top_n=5):
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request, playlist: str = None, theme: str = "light"):
     if not playlist:
-        return templates.TemplateResponse("indie_report.html", {"request": request, "playlist_name": None})
+        return templates.TemplateResponse(request, "indie_report.html", {"playlist_name": None})
 
     try:
         logging.info("🔗 Received playlist URL")
@@ -428,8 +424,7 @@ async def read_root(request: Request, playlist: str = None, theme: str = "light"
         else:
             percentile_txt = f"Your playlist ranks in the bottom {100 - percentile}% of all users ({rank} / {total})..."
 
-        return templates.TemplateResponse("indie_report.html", {
-            "request": request,
+        return templates.TemplateResponse(request, "indie_report.html", {
             "playlist_name": playlist_name,
             "playlist_url": playlist,
             "playlist_image_url": playlist_image_url,
@@ -449,8 +444,7 @@ async def read_root(request: Request, playlist: str = None, theme: str = "light"
             "theme": theme
         })
     except Exception as e:
-        return templates.TemplateResponse("indie_report.html", {
-            "request": request,
+        return templates.TemplateResponse(request, "indie_report.html", {
             "playlist_name": None,
             "error": str(e)
         })
@@ -458,8 +452,7 @@ async def read_root(request: Request, playlist: str = None, theme: str = "light"
 @app.get("/admin/leaderboard", response_class=HTMLResponse)
 def show_leaderboard(request: Request, playlist: str = None):
     leaderboard = load_leaderboard()
-    return templates.TemplateResponse("leaderboard_view.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "leaderboard_view.html", {
         "leaderboard": leaderboard,
         "playlist": playlist
     })
