@@ -24,7 +24,8 @@ logging.basicConfig(
         logging.StreamHandler()
     ]
 )
-os.makedirs("/data", exist_ok=True)
+DATA_DIR = os.getenv("DATA_DIR", os.path.abspath("data"))
+os.makedirs(DATA_DIR, exist_ok=True)
 
 app = FastAPI()
 templates = Jinja2Templates(directory="app/templates")
@@ -37,8 +38,25 @@ CONCURRENT_TASKS = 5
 RETRIES = 3
 max_listeners = 1.2e8
 
-ARTIST_URLS_CACHE_FILE = "/data/artist_urls_cache.json"
-LISTENERS_CACHE_FILE = "/data/listeners_cache.json"
+ARTIST_URLS_CACHE_FILE = os.path.join(DATA_DIR, "artist_urls_cache.json")
+LISTENERS_CACHE_FILE = os.path.join(DATA_DIR, "listeners_cache.json")
+LEADERBOARD_FILE = os.path.join(DATA_DIR, "leaderboard.json")
+
+def ensure_cache_file(filename):
+    data_path = os.path.join(DATA_DIR, filename)
+    if not os.path.exists(data_path):
+        if os.path.exists(filename):
+            shutil.copyfile(filename, data_path)
+            logging.info(f"📁 Copied initial cache file to persistent storage: {data_path}")
+        else:
+            with open(data_path, "w") as f:
+                json.dump({}, f)
+            logging.info(f"📁 Created new empty cache file: {data_path}")
+
+# On startup:
+ensure_cache_file("artist_urls_cache.json")
+ensure_cache_file("listeners_cache.json")
+ensure_cache_file("leaderboard.json")
 
 
 def safe_load_cache(cache_file):
@@ -303,9 +321,6 @@ def get_listener_distribution(df):
     distribution = distribution.rename(columns={'ListenerRange': 'label'})
     distribution = distribution.fillna({'score_band': 0, 'percent': 0})
     return distribution.to_dict(orient='records')
-
-
-LEADERBOARD_FILE = "/data/leaderboard.json"
 
 
 def load_leaderboard():
