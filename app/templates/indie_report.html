@@ -194,6 +194,23 @@ form button {
     
       
       <h3>{{ percentile }}</h3>
+      <a
+      href="/admin/leaderboard?playlist={{ playlist_url }}"
+      style="
+        display: inline-block;
+        background-color: #1db954;
+        color: white;
+        font-weight: 600;
+        padding: 12px 20px;
+        border-radius: 8px;
+        text-decoration: none;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: background-color 0.3s ease;
+      "
+      onmouseover="this.style.backgroundColor='#4f46e5'"
+      onmouseout="this.style.backgroundColor='#6366f1'"
+    >View Leaderboard
+    </a>
       <div class="col" style="text-align:left;">
         <h2 style="text-align:center;">Playlists with Similar IndieScores</h2>
         <div style="display: flex; flex-direction: column; gap: 16px; margin-top: 20px;">

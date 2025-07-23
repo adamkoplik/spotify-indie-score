@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
+from fastapi.responses import FileResponse
 from fastapi.templating import Jinja2Templates
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
@@ -15,6 +16,8 @@ import shutil
 import logging
 import httpx
 from bs4 import BeautifulSoup
+import tempfile
+import tarfile
 
 logging.basicConfig(
     level=logging.DEBUG,  # ✅ Make sure this is DEBUG
@@ -57,7 +60,6 @@ def ensure_cache_file(filename):
 ensure_cache_file("artist_urls_cache.json")
 ensure_cache_file("listeners_cache.json")
 ensure_cache_file("leaderboard.json")
-
 
 def safe_load_cache(cache_file):
     if not os.path.exists(cache_file):
@@ -453,3 +455,28 @@ async def read_root(request: Request, playlist: str = None, theme: str = "light"
             "error": str(e)
         })
     
+@app.get("/admin/leaderboard", response_class=HTMLResponse)
+def show_leaderboard(request: Request, playlist: str = None):
+    leaderboard = load_leaderboard()
+    return templates.TemplateResponse("leaderboard_view.html", {
+        "request": request,
+        "leaderboard": leaderboard,
+        "playlist": playlist
+    })
+
+
+@app.get("/admin/download/leaderboard")
+def download_all_cache():
+    # Create a temporary tar.gz archive in memory
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".tar.gz") as tmp_file:
+        with tarfile.open(fileobj=tmp_file, mode="w:gz") as tar:
+            tar.add(LEADERBOARD_FILE, arcname="leaderboard.json")
+            tar.add(ARTIST_URLS_CACHE_FILE, arcname="artist_urls_cache.json")
+            tar.add(LISTENERS_CACHE_FILE, arcname="listeners_cache.json")
+        tmp_path = tmp_file.name
+
+    return FileResponse(
+        tmp_path,
+        media_type='application/gzip',
+        filename="indie-score-cache.tar.gz"
+    )

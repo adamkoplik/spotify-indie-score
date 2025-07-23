@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+    
+<head>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <script>
+    // Set data-bs-theme on the iframe app
+    document.documentElement.setAttribute("data-bs-theme", "{{ theme }}");
+  </script>  
+  <meta charset="UTF-8" />
+  <title>Your Indievaluation</title>
+  <style>
+    
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f5f5f5;
+    margin: 20px;
+}
+.container {
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+.col {
+    flex: 1;
+    min-width: 300px;
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+.artist-img {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+th, td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+}
+th {
+    background-color: #1db954;
+    color: white;
+}
+h2 {
+    color: #264653;
+}
+form input[type="text"] {
+    width: 300px; 
+    padding: 10px; 
+    font-size: 16px; 
+    border: 1px solid #ccc; 
+    border-radius: 5px;
+}
+form button {
+    padding: 10px 20px; 
+    font-size: 16px; 
+    background-color: #1db954; 
+    color: white; 
+    border: none; 
+    border-radius: 5px; 
+    cursor: pointer;
+}
+.similar-playlists {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.playlist-card {
+  display: flex;
+  align-items: center;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  padding: 16px;
+  gap: 16px;
+  text-decoration: none;
+  color: inherit;
+  transition: box-shadow 0.2s ease;
+}
+
+.playlist-card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.playlist-img {
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.playlist-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.playlist-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #222;
+  margin: 0;
+}
+
+.playlist-owner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.owner-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.owner-name {
+  color: #1db954;
+  text-decoration: none;
+}
+
+.owner-name:hover {
+  text-decoration: underline;
+}
+
+.playlist-score {
+  font-size: 0.85rem;
+  color: #444;
+}
+
+  </style>
+</head>
+<body>
+  <div style="text-align: center; margin-bottom: 40px;">
+    <form method="get" action="/">
+      <input type="text" name="playlist" placeholder="Paste Spotify Playlist Link"
+        style="width: 300px; padding: 10px; font-size: 16px;" />
+      <button type="submit" style="padding: 10px 20px;">Get My Indie Score!</button>
+    </form>
+  </div>
+
+{% block content %}
+<h2>🎖 Current Leaderboard</h2>
+<a
+href="/?playlist={{ playlist }}"
+style="
+  display: inline-block;
+  background-color: #6366f1;
+  color: white;
+  font-weight: 600;
+  padding: 12px 20px;
+  margin: 5px 0px 25px;
+  border-radius: 8px;
+  text-decoration: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease;
+"
+onmouseover="this.style.backgroundColor='#4f46e5'"
+onmouseout="this.style.backgroundColor='#6366f1'"
+>Return to Indievaluation
+</a>
+
+<table style="width: 100%; border-collapse: collapse;">
+  <thead>
+    <tr>
+      <th>Rank</th>
+      <th>Playlist Name</th>
+      <th>Score</th>
+      <th>
+        Owner
+        <a href="/admin/download/leaderboard" title="Download leaderboard" style="margin-left: 8px; color: white; text-decoration: none;">
+          <i class="fa-solid fa-download"></i>
+        </a>
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for entry in leaderboard %}
+    <tr>
+      <td>{{ loop.index }}</td>
+      <td>    <div style = "display: flex; flex-direction: row; align-items: center; gap: 5px;">
+        {% if entry.owner_image_url %}
+          <img src="{{ entry.image_url }}" alt="{{ entry.playlist_name }}"
+              style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;" />
+        {% endif %}
+        <a href="{{ entry.playlist_url }}" target="_blank"
+          style="font-size: 0.9rem; color: #1db954; text-decoration: none;">{{ entry.playlist_name }}</a></div></td>
+      <td>{{ entry.score }}</td>
+      <td>    <div style = "display: flex; flex-direction: row; align-items: center; gap: 5px;">
+        {% if entry.owner_image_url %}
+          <img src="{{ entry.owner_image_url }}" alt="{{ entry.owner_name }}"
+              style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;" />
+        {% endif %}
+        <a href="{{ entry.owner_url }}" target="_blank"
+          style="font-size: 0.9rem; color: #1db954; text-decoration: none;">{{ entry.owner_name }}</a></div></td>
+    </tr>
+
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
+</body>
+</html>
