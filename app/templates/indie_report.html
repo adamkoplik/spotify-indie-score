@@ -8,191 +8,137 @@
   <meta charset="UTF-8" />
   <title>Your Indievaluation Report</title>
   <style>
-    /* Match Quarto dark/light theme structure */
-    html[data-bs-theme="light"],
-:root[data-bs-theme="light"] {
-  --color-background: linear-gradient(to bottom,#1a1b2f, #141525);
-  --color-text: ivory;
-  --color-border: ivory;
-  --color-card-bg: linear-gradient(to bottom,#1a1b2f, #141525);
-  --color-heading: ivory;
-  --color-link: ivory;
-  --color-link-hover: #1a1b2f;
-  --color-button-bg: ivory;
-  --color-button-hover-bg: #1a1b2f;
-  --color-input-bg: linear-gradient(to bottom,#1a1b2f, #141525);
-  --color-input-border: ivory;
-}
-
-html[data-bs-theme="dark"],
-:root[data-bs-theme="dark"] {
-  --color-background: linear-gradient(to bottom, ivory, #ffffe3);
-  --color-text: #1a1b2f;
-  --color-border: #1a1b2f;
-  --color-card-bg: linear-gradient(to bottom, ivory, #ffffe3);
-  --color-heading: #1a1b2f;
-  --color-link: #1a1b2f;
-  --color-link-hover: ivory;
-  --color-button-bg: #1a1b2f;
-  --color-button-hover-bg: ivory;
-  --color-input-bg: linear-gradient(to bottom, ivory, #ffffe3);
-  --color-input-border: #1a1b2f;
-}
-
-/* === Base Layout === */
+    
 body {
-  background: var(--color-background);
-  color: var(--color-text);
-  font-family: system-ui, sans-serif;
-  padding: 2rem;
-  transition: background 0.3s ease, color 0.3s ease;
+    font-family: 'Roboto', sans-serif;
+    background-color: #f5f5f5;
+    margin: 20px;
 }
-
-h2, h3 {
-  color: var(--color-heading);
-}
-
-/* === Layout Cards === */
 .container {
-  display: flex;
-  gap: 30px;
-  justify-content: center;
-  flex-wrap: wrap;
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+    flex-wrap: wrap;
 }
 .col {
-  flex: 1;
-  min-width: 300px;
-  background: var(--color-card-bg);
-  padding: 20px;
-  border-radius: 12px;
-  border: 1px solid var(--color-border);
-  box-shadow: #9c55f1 0px 3px 8px;
-  background: var(--color-card-bg);
-  color: var(--color-text);}
-
-/* === Images === */
-.artist-img {
-  width: 150px;
-  height: 150px;
-  object-fit: cover;
-  border-radius: 10px;
-  border: 1px solid var(--color-border);
-  box-shadow: #9c55f1 0px 3px 8px;
+    flex: 1;
+    min-width: 300px;
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
-
-/* === Tables === */
+.artist-img {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
 table {
-  width: 100%;
-  border-collapse: collapse;
+    width: 100%;
+    border-collapse: collapse;
 }
 th, td {
-  padding: 8px 12px;
-  border-bottom: 1px solid var(--color-border);
-  text-align: left;
+    padding: 8px 12px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
 }
 th {
-  background-color: var(--color-button-bg);
-  color: var(--color-link-hover);
+    background-color: #1db954;
+    color: white;
 }
-
-/* === Forms === */
+h2 {
+    color: #264653;
+}
 form input[type="text"] {
-  width: 300px;
-  padding: 10px;
-  font-size: 16px;
-  border: 1px solid var(--color-input-border);
-  border-radius: 5px;
-  background: var(--color-input-bg);
-  color: var(--color-text);
+    width: 300px; 
+    padding: 10px; 
+    font-size: 16px; 
+    border: 1px solid #ccc; 
+    border-radius: 5px;
 }
 form button {
-  padding: 10px 20px;
-  font-size: 16px;
-  background-color: var(--color-button-bg);
-  color: var(--color-link-hover);
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
+    padding: 10px 20px; 
+    font-size: 16px; 
+    background-color: #1db954; 
+    color: white; 
+    border: none; 
+    border-radius: 5px; 
+    cursor: pointer;
 }
-form button:hover {
-  background-color: var(--color-button-hover-bg);
-  color: var(--color-link);
-}
-
-/* === Similar Playlists === */
 .similar-playlists {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
+
 .playlist-card {
   display: flex;
   align-items: center;
-  background: var(--color-card-bg);
+  background: white;
   border-radius: 12px;
-  border: 1px solid var(--color-border);
-  box-shadow: #9c55f1 0px 3px 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   padding: 16px;
   gap: 16px;
   text-decoration: none;
   color: inherit;
   transition: box-shadow 0.2s ease;
 }
+
 .playlist-card:hover {
-  box-shadow: #9c55f1 0px 3px 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
+
 .playlist-img {
   width: 80px;
   height: 80px;
   border-radius: 8px;
-  border: 1px solid var(--color-border);
   object-fit: cover;
   flex-shrink: 0;
 }
+
 .playlist-text {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
+
 .playlist-title {
   font-size: 1.2rem;
   font-weight: 600;
-  color: var(--color-text);
+  color: #222;
   margin: 0;
 }
+
 .playlist-owner {
   display: flex;
   align-items: center;
   gap: 8px;
   font-size: 0.9rem;
-  color: var(--color-text);
+  color: #555;
 }
+
 .owner-avatar {
   width: 24px;
   height: 24px;
   border-radius: 50%;
   object-fit: cover;
 }
+
 .owner-name {
-  color: var(--color-link);
+  color: #1db954;
   text-decoration: none;
 }
+
 .owner-name:hover {
   text-decoration: underline;
 }
+
 .playlist-score {
   font-size: 0.85rem;
-  color: var(--color-text);
+  color: #444;
 }
-
-/* === Links === */
-a {
-  color: var(--color-link);
-}
-a:hover {
-  color: var(--color-link-hover);
-}
-
 
   </style>
 </head>
@@ -229,12 +175,13 @@ a:hover {
           href="sms:?&body={{ share_text | urlencode }}"
           style="
             display: inline-block;
-            background-color: #9c55f1;
-            color:white;
+            background-color: #6366f1;
+            color: white;
             font-weight: 600;
             padding: 12px 20px;
             border-radius: 8px;
             text-decoration: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             transition: background-color 0.3s ease;
           "
           onmouseover="this.style.backgroundColor='#4f46e5'"
@@ -247,12 +194,12 @@ a:hover {
     
       
       <h3>{{ percentile }}</h3>
-
+      <div class="col" style="text-align:left;">
         <h2 style="text-align:center;">Playlists with Similar IndieScores</h2>
         <div style="display: flex; flex-direction: column; gap: 16px; margin-top: 20px;">
           {% for pl in similar_playlists[:5] %}
             <a href="{{ pl.playlist_url }}" target="_blank"
-               style="display: flex; align-items: center; background: var(--color-card-bg); border-radius: 12px; box-shadow: #9c55f1 0px 3px 8px;; padding: 16px; gap: 16px; text-decoration: none; color: inherit;">
+               style="display: flex; align-items: center; background: white; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); padding: 16px; gap: 16px; text-decoration: none; color: inherit;">
         
               <img src="{{ pl.image_url }}" alt="{{ pl.playlist_name }}"
                    style="width: 80px; height: 80px; border-radius: 8px; object-fit: cover; flex-shrink: 0;" />
@@ -275,7 +222,7 @@ a:hover {
           {% endfor %}
         </div>
         
-
+      </div>
       
       
     </div>
