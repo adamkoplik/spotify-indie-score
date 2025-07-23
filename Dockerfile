@@ -14,9 +14,6 @@ COPY . .
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
-# 🧠 DON'T set PLAYWRIGHT_BROWSERS_PATH — use default path!
-RUN python -m playwright install chromium
-
 # Render requires this
 ENV PORT=10000
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "10000"]
