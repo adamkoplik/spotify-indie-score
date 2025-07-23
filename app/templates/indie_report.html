@@ -229,14 +229,27 @@ form button {
 
     <div class="col" style="text-align:center;">
       <h2>Your Most Indie Artist</h2>
+
+{% if most_indie_artist_url %}
+  <a href="{{ most_indie_artist_url }}" target="_blank" rel="noopener noreferrer" style="text-decoration: none; color: inherit;">
+    {% if most_indie_artist_image %}
       <img src="{{ most_indie_artist_image }}" alt="{{ most_indie_artist_name }}" class="artist-img" />
-      <h3>{{ most_indie_artist_name }}</h3>
+    {% endif %}
+    <h3>{{ most_indie_artist_name }}</h3>
+  </a>
+{% else %}
+  {% if most_indie_artist_image %}
+    <img src="{{ most_indie_artist_image }}" alt="{{ most_indie_artist_name }}" class="artist-img" />
+  {% endif %}
+  <h3>{{ most_indie_artist_name }}</h3>
+{% endif %}
+
       <p>IndieScore: {{ most_indie_artist_score }}</p>
 
       <h3>Artist Distribution</h3>
       <table>
         <thead>
-          <tr><th>Range</th><th>IndieScore</th><th>Songs</th><th>Percent</th></tr>
+          <tr><th>Range</th><th>Average IndieScore</th><th>Songs</th><th>Percent</th></tr>
         </thead>
         <tbody>
           {% for row in listener_distribution %}

@@ -438,6 +438,7 @@ async def read_root(request: Request, playlist: str = None, theme: str = "light"
             "most_indie_artist_score": most_indie_artist['IndieScore'],
             "most_indie_artist_count": most_indie_artist['n'],
             "most_indie_artist_image": most_indie_artist_image,
+            "most_indie_artist_url": most_indie_artist_url,
             "rank": rank,
             "total": total,
             "percentile": percentile_txt,
