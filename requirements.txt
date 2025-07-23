@@ -4,9 +4,10 @@ jinja2
 spotipy
 pandas
 numpy
-playwright>=1.44.0
 aiofiles
 matplotlib
 seaborn
 tk
 python-multipart
+httpx
+beautifulsoup4

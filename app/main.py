@@ -5,7 +5,6 @@ import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 import re
 import asyncio
-from playwright.async_api import async_playwright
 import random
 import pandas as pd
 import numpy as np
@@ -14,6 +13,8 @@ import json
 import os
 import shutil
 import logging
+import httpx
+from bs4 import BeautifulSoup
 
 logging.basicConfig(
     level=logging.DEBUG,  # ✅ Make sure this is DEBUG
@@ -90,7 +91,7 @@ def get_artists_from_playlist(playlist_url, sp):
         raise ValueError("Invalid playlist URL")
     playlist_id = match.group(1)
 
-    logging.debug(f"Playlist ID: {playlist_id}")
+    logging.info(f"Playlist ID: {playlist_id}")
 
     artist_counts = defaultdict(int)
     results = sp.playlist_items(playlist_id, additional_types=['track'])
@@ -138,60 +139,59 @@ def get_artist_urls(artist_names, sp):
     return urls
 
 
-async def fetch_with_retry(page, artist, url, retries=RETRIES):
+async def fetch_with_retry(artist, url, retries=RETRIES):
+    headers = {
+        "User-Agent": "Mozilla/5.0"
+    }
+
     for attempt in range(1, retries + 1):
         try:
-            await page.goto(url, timeout=15000)
-            await page.wait_for_timeout(random.randint(2000, 4000))
-            html = await page.content()
+            async with httpx.AsyncClient(timeout=15.0, headers=headers) as client:
+                response = await client.get(url)
+                response.raise_for_status()
+                html = response.text
 
-            match = re.search(r'([\d,]+)\s+monthly listeners', html, re.IGNORECASE)
-            if not match:
-                raise ValueError(f"Monthly listeners not found for artist '{artist}'")
+            soup = BeautifulSoup(html, 'html.parser')
+            match = soup.find(string=re.compile(r'([\d,]+)\s+monthly listeners', re.IGNORECASE))
+            if match:
+                result = re.search(r'([\d,]+)\s+monthly listeners', match)
+                if result:
+                    listeners = result.group(1)
+                    return (artist, listeners)
 
-            listeners = match.group(1)
-            return (artist, listeners)
+            raise ValueError(f"Monthly listeners not found for artist '{artist}'")
 
-        except Exception:
+        except Exception as e:
             if attempt == retries:
                 return (artist, None)
             await asyncio.sleep(1.5 * attempt)
 
-
 async def fetch_monthly_listeners(artist_urls):
-    logging.info("📡 Starting monthly listeners fetch")
+    logging.info("📡 Starting monthly listeners fetch (httpx)")
     results = []
     semaphore = asyncio.Semaphore(CONCURRENT_TASKS)
     cache = safe_load_cache(LISTENERS_CACHE_FILE)
 
-    async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=True)
-        logging.info("🚀 Chromium launched")
+    async def bound_fetch(artist, url):
+        if not url:
+            return (artist, None)
+        if artist in cache:
+            return (artist, cache[artist])
+        async with semaphore:
+            result = await fetch_with_retry(artist, url)
+            if result[1] is not None:
+                cache[artist] = result[1]
+            return result
 
-        async def bound_fetch(artist, url):
-            if not url:
-                return (artist, None)
-            if artist in cache:
-                return (artist, cache[artist])
-            async with semaphore:
-                page = await browser.new_page()
-                result = await fetch_with_retry(page, artist, url)
-                await page.close()
-                if result[1] is not None:
-                    cache[artist] = result[1]
-                return result
-
-        tasks = [bound_fetch(artist, url) for artist, url in artist_urls.items()]
-        for coro in asyncio.as_completed(tasks):
-            result = await coro
-            results.append(result)
-
-        await browser.close()
-        logging.info("🛑 Chromium closed")
+    tasks = [bound_fetch(artist, url) for artist, url in artist_urls.items()]
+    for coro in asyncio.as_completed(tasks):
+        result = await coro
+        results.append(result)
 
     save_cache(cache, LISTENERS_CACHE_FILE)
     logging.info("💾 Cache saved")
     return results
+
 
 def parse_listeners(listeners_str):
     if listeners_str is None:
