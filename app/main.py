@@ -24,7 +24,7 @@ logging.basicConfig(
         logging.StreamHandler()
     ]
 )
-
+os.makedirs("/data", exist_ok=True)
 
 app = FastAPI()
 templates = Jinja2Templates(directory="app/templates")
@@ -37,8 +37,8 @@ CONCURRENT_TASKS = 5
 RETRIES = 3
 max_listeners = 1.2e8
 
-ARTIST_URLS_CACHE_FILE = "artist_urls_cache.json"
-LISTENERS_CACHE_FILE = "listeners_cache.json"
+ARTIST_URLS_CACHE_FILE = "/data/artist_urls_cache.json"
+LISTENERS_CACHE_FILE = "/data/listeners_cache.json"
 
 
 def safe_load_cache(cache_file):
@@ -88,7 +88,7 @@ def get_artists_from_playlist(playlist_url, sp):
     pattern = r"playlist/([a-zA-Z0-9]+)"
     match = re.search(pattern, playlist_url)
     if not match:
-        raise ValueError("Invalid playlist URL")
+        raise ValueError("That playlist is so Indie it's not even a playlist. Score: 0. Try again!")
     playlist_id = match.group(1)
 
     logging.info(f"Playlist ID: {playlist_id}")
@@ -98,7 +98,7 @@ def get_artists_from_playlist(playlist_url, sp):
         results = sp.playlist_items(playlist_id, additional_types=['track'])
     except spotipy.exceptions.SpotifyException as e:
         if e.http_status == 404:
-            raise ValueError("This playlist is private or does not exist.")
+            raise ValueError("Are you for real gate keeping your playlist? That's kinda embarassing. That playlist is private, try again! ")
         else:
             raise
 
@@ -305,7 +305,7 @@ def get_listener_distribution(df):
     return distribution.to_dict(orient='records')
 
 
-LEADERBOARD_FILE = "leaderboard.json"
+LEADERBOARD_FILE = "/data/leaderboard.json"
 
 
 def load_leaderboard():
@@ -358,7 +358,7 @@ def get_similar_playlists(current_id, current_score, leaderboard, top_n=5):
 
 
 @app.get("/", response_class=HTMLResponse)
-async def read_root(request: Request, playlist: str = None):
+async def read_root(request: Request, playlist: str = None, theme: str = "light"):
     if not playlist:
         return templates.TemplateResponse("indie_report.html", {"request": request, "playlist_name": None})
 
@@ -426,7 +426,9 @@ async def read_root(request: Request, playlist: str = None):
             "rank": rank,
             "total": total,
             "percentile": percentile_txt,
-            "similar_playlists": similar_playlists
+            "similar_playlists": similar_playlists,
+            "share_text": f"My playlist '{playlist_name}' got an IndieScore of {weighted_indie_score}!\nThink you can beat it? Try at https://spotify-indie-score.onrender.com/",
+            "theme": theme
         })
     except Exception as e:
         return templates.TemplateResponse("indie_report.html", {
