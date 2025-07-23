@@ -94,7 +94,13 @@ def get_artists_from_playlist(playlist_url, sp):
     logging.info(f"Playlist ID: {playlist_id}")
 
     artist_counts = defaultdict(int)
-    results = sp.playlist_items(playlist_id, additional_types=['track'])
+    try:
+        results = sp.playlist_items(playlist_id, additional_types=['track'])
+    except spotipy.exceptions.SpotifyException as e:
+        if e.http_status == 404:
+            raise ValueError("This playlist is private or does not exist.")
+        else:
+            raise
 
     while results:
         for item in results['items']:
@@ -239,13 +245,23 @@ def get_artist_image_from_url(artist_url, sp):
 
 
 def extract_playlist_id(playlist_url):
-    return re.search(r"playlist/([a-zA-Z0-9]+)", playlist_url).group(1)
+    match = re.search(r"playlist/([a-zA-Z0-9]+)", playlist_url)
+    if not match:
+        raise ValueError("Invalid Spotify playlist URL.")
+    return match.group(1)
+
 
 
 def get_playlist_info(playlist_url: str, sp):
     playlist_id = extract_playlist_id(playlist_url)
     logging.info(f"📥 Extracted playlist ID: {playlist_id}")
-    data = sp.playlist(playlist_id)
+    try:
+        data = sp.playlist(playlist_id)
+    except spotipy.exceptions.SpotifyException as e:
+        if e.http_status == 404:
+            raise ValueError("This playlist is private or does not exist.")
+        else:
+            raise
     name = data['name']
     image_url = data['images'][0]['url'] if data['images'] else None
     logging.info("" \
